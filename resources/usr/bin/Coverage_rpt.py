@@ -18,29 +18,31 @@ import vcf
 from pandas import DataFrame
 
 
-def readdep(df_flank, rpt, df_bed):
+def readdep(df_flank, rpt, df_lookup, flankfilename):
     '''Identifies and reports SWIFT amplicons with read depth coverage <1000 reads or <500 reads F or R'''
     rpt.write("AMPLICON COVERAGE\n")
+    rpt.write("File: " + flankfilename + "\n")
     # dataframe to record amplicons with poor coverage
     df_1000 = DataFrame(columns=['Amplicon', 'Gene', 'cDNA', 'Codons', 'TotalReads', 'Forward', 'Reverse'])
     df_2000 = DataFrame(columns=['Amplicon', 'Gene', 'cDNA', 'Codons', 'TotalReads', 'Forward', 'Reverse'])
     for index, rd in df_flank.iterrows():
-        # identify amplicons with <1000 total read depth and < 500 F and R read depth = poor covereage
+        # identify amplicons with <1000 total read depth and < 500 F and R read depth (rd) = poor covereage
         if rd['total'] < 1000 or rd['forward'] < 500 or rd['reverse'] < 500:
-            # identify which cDNA and Codons are covered by amplicon from bedfile
-            for index, bed in df_bed.iterrows():
-                if rd['gene'].strip() == bed['Amplivar_Name']:
-                    df_1000.loc[len(df_1000)] = rd['gene'], bed['Gene'], bed['cDNA'], bed['Codons'], rd['total'], rd[
-                        'forward'], rd['reverse']
+            # identify which cDNA and Codons are covered by amplicon from look up table
+            for index, lookup in df_lookup.iterrows():
+                if rd['gene'].strip() == lookup['Amplivar_Name']:
+                    df_1000.loc[len(df_1000)] = rd['gene'], lookup['Gene'], lookup['cDNA'], lookup['Codons'], rd[
+                        'total'], rd[
+                                                    'forward'], rd['reverse']
 
         # identify amplicon with read depth of < 2000
         elif rd['total'] < 2000:
-            # identify which cDNA and Codons are covered by amplicon from bedfile
-            for index, bed in df_bed.iterrows():
-                if rd['gene'].strip() == bed['Amplivar_Name']:
-                    df_2000.loc[len(df_2000)] = rd['gene'], bed['Gene'], bed['cDNA'], bed['Codons'], rd['total'], rd[
-                        'forward'], rd['reverse']
-
+            # identify which cDNA and Codons are covered by amplicon from look up table
+            for index, lookup in df_lookup.iterrows():
+                if rd['gene'].strip() == lookup['Amplivar_Name']:
+                    df_2000.loc[len(df_2000)] = rd['gene'], lookup['Gene'], lookup['cDNA'], lookup['Codons'], rd[
+                        'total'], rd[
+                                                    'forward'], rd['reverse']
 
     # report amplicons failing RD
     if len(df_1000) > 0:
@@ -57,25 +59,25 @@ def readdep(df_flank, rpt, df_bed):
         rpt.write("All amplicons were covered > 1000x total, with > 500x Forward and Reverse\n\n")
 
 
-def ampSB(df_flank, rpt, flankfile, df_bed):
+def ampSB(df_flank, rpt, flankfile, df_lookup):
     '''Identifies SWIFT amplicons with a F/R strand bias (+/-20%)'''
     rpt.write("\nAMPLICON STRAND BIAS\n")
     rpt.write("(Strand bias defined as +/-20% variation between forward or reverse read count)\n")
-    # dataframe to record amplicons with stand bias
-    df_sb = DataFrame(columns=['Amplicon', 'Gene', 'cDNA', 'Condons', 'StrandBiasRatio'])
+    # dataframe to record amplicons with stand bias (sb)
+    df_sb = DataFrame(columns=['Amplicon', 'Gene', 'cDNA', 'Condons', 'Forward', 'Reverse', 'StrandBiasRatio'])
     ratio = []
-    for index, sb in df_flank.iterrows():
-        # identify amplicons with F/R read depth strand bias (+/-20%)
-        s = round(float(sb['forward']) / float(sb['reverse']), 4)
-        ratio.append(s)
-        if s > 1.2 or s < 0.8: #for amplicons with strand bias record cDNA and codons affected
-            for index, bed in df_bed.iterrows():
-                if sb['gene'].strip() == bed['Amplivar_Name']:
-                    df_sb.loc[len(df_sb)] = [sb['gene'], bed['Gene'], bed['cDNA'], bed['Codons'], s]
+    for index, flankrow in df_flank.iterrows():
+        # identify amplicons with F/R read depth strand bias (sb) (+/-20%)
+        sb = round(float(flankrow['forward']) / float(flankrow['reverse']), 4)
+        ratio.append(sb)
+        if sb > 1.2 or sb < 0.8:  # for amplicons with strand bias record cDNA and codons affected
+            for index, lookup in df_lookup.iterrows():
+                if flankrow['gene'].strip() == lookup['Amplivar_Name']:
+                    df_sb.loc[len(df_sb)] = [flankrow['gene'], lookup['Gene'], lookup['cDNA'], lookup['Codons'],
+                                             flankrow['forward'], flankrow['reverse'], sb]
     # report amplicons failing strand bias
     if len(df_sb) > 0:
         rpt.write("Amplicons with a strand bias +/-20% in forward or reverse" + "\n")
-        # print "Amplicons with a strand bias +/-20% in forward or reverse" + "\n"
         rpt.write(df_sb.to_csv(sep='\t', index=False))
         rpt.write("No strand bias observed in other amplicons (+/-20% F/R)\n\n")
         # print df_sb
@@ -86,33 +88,43 @@ def ampSB(df_flank, rpt, flankfile, df_bed):
     df_flank.to_csv(flankfile, sep='\t', index=False)
 
 
-def varSB(vcffile, rpt, df_bed):
+def vcf_strandbias(vcffile, vcffilepath, rpt, df_lookup):
     '''Identifies strand bias (F/R +/- 20%) in variants called'''
     rpt.write("\nVARIANT STRAND BIAS\n")
+    rpt.write("File: " + vcffile)
+    rpt.write("\nNOTE: For variants covered by >1 amplicon, each amplicon will be displayed on a separate row.\n")
     rpt.write("(stand bias defined as >90% variant supporting reads are from 1 read direction (forward or reverse))\n")
     # Dataframe for variants failing strand bias check
     df_vSB = DataFrame(columns=['CHROM', 'POS', 'REF', 'ALT', 'StrandBias(FwdRead%)', 'Amplicon'])
-    myvcf = vcf.Reader(open(vcffile, 'r'))
+    myvcf = vcf.Reader(open(vcffilepath, 'r'))
+
     for record in myvcf:
         # record amplicons as a list, so if >1 amplicons cover a variant, all are recorded
         amp = []
-        for index, bed in df_bed.iterrows():
-            # uses variant position and amplicons start and end location to identify corresponding amplicons
-            if record.POS >= bed['Start'] and record.POS <= bed['End']:
-                amp.append(bed['Amplivar_Name'])
+        # uses variant position and amplicons start and end location to name amplicons
+        for index, lookup in df_lookup.iterrows():
+            if record.POS >= lookup['Start'] and record.POS <= lookup['End']:
+                amp.append(lookup['Amplivar_Name'])
 
         for sample in record.samples:
-            adf = sample['ADF']
-            ad = sample['AD']
-            sb = round((float(adf) / float(ad)) * 100, 4)
-
+            # find variant allele depth and variant fwd allele depth from varscan vcf
+            if "varscan." in vcffile:
+                alleledepth_fwd = sample['ADF']
+                alleledepth = sample['AD']
+            # find variant allele depth and variant fwd allele depth from vardict vcf
+            elif "vardict." in vcffile:
+                alleledepth_fwd = sample['ALD'][0]
+                alleledepth = sample['AD'][1]
+            # Use variant allele depths to calculate strand bias
+            sb = round((float(alleledepth_fwd) / float(alleledepth)) * 100, 4)
             # Generate a dataframe of variants displaying strand bias.
-            # Strand bias is set as variants with >90% supporting reads in one direction
+            # Strand bias is defined as variants with >90% supporting reads in one direction
             if sb >= 90 or sb <= 10:
                 # reformat ALT and amp to be a string rather than a list.
                 alt = ",".join(str(i) for i in record.ALT)
                 amp = ", ".join(str(i) for i in amp)
                 df_vSB.loc[len(df_vSB)] = [record.CHROM, record.POS, record.REF, alt, sb, amp]
+
     # report variants failing strand bias
     if len(df_vSB) > 0:
         rpt.write(
@@ -123,143 +135,167 @@ def varSB(vcffile, rpt, df_bed):
         rpt.write("No strand bias observed in variants called.\n")
 
 
-def varFreq(vcffile, rpt,df_bed):
+def vcf_freq(vcffile, vcffilepath, rpt, df_lookup):
     ''' Summaries variants identified,upon which amplicon they are located and the alt allele frequency.'''
-    #print vcffile
     rpt.write("\nVARIANT/AMPLICON SUMMARY\n")
-    rpt.write("from:" + vcffile + "\n")
-    avcf = vcf.Reader(open(vcffile, 'r'))
-    df_var = DataFrame(columns=['Amplicon', 'Gene', 'cDNA', 'Codons','CHROM', 'POS', 'REF', 'ALT', 'Alt_Allele_Freq' ])
+    rpt.write("File:" + vcffile + "\n")
+    rpt.write("NOTE: For variants covered by >1 amplicon, each amplicon will be displayed on a separate row.\n")
+    avcf = vcf.Reader(open(vcffilepath, 'r'))
+    df_var = DataFrame(columns=['Amplicon', 'Gene', 'cDNA', 'Codons', 'CHROM', 'POS', 'REF', 'ALT', 'Alt_Allele_Freq'])
+    # loops through vcf variants
     for record in avcf:
-        alt = ",".join(str(i) for i in record.ALT) #reformat alt
-        # record amplicons as a list, so if >1 amplicons cover a variant, all are recorded
-        amp = []
+        # reformat alt to be a string
+        alt = ",".join(str(i) for i in record.ALT)
         offtarget = False
-        for index, bed in df_bed.iterrows():
-            # uses variant position and amplicons start and end location to identify corresponding amplicons
-            if record.POS >= bed['Start'] and record.POS <= bed['End']:
+        # uses variants genomic position compared to amplicons start and end location to identify corresponding amplicons
+        # loops through lookup table
+        for index, lookup in df_lookup.iterrows():
+            if record.POS >= lookup['Start'] and record.POS <= lookup['End']:
                 offtarget = True
                 for s in record.samples:
-                    df_var.loc[len(df_var)] = [bed['Amplivar_Name'],  bed['Gene'], bed['cDNA'],bed['Codons'], record.CHROM, record.POS, record.REF, alt, s['FREQ']]
+                    # run loop to pull out info from varscan vcf
+                    if "varscan." in vcffile:
+                        df_var.loc[len(df_var)] = [lookup['Amplivar_Name'], lookup['Gene'], lookup['cDNA'],
+                                                   lookup['Codons'], record.CHROM, record.POS, record.REF, alt,
+                                                   s['FREQ']]
+                    # run loop to pull out info from VarDict vcf
+                    elif "vardict." in vcffile:
+                        df_var.loc[len(df_var)] = [lookup['Amplivar_Name'], lookup['Gene'], lookup['cDNA'],
+                                                   lookup['Codons'], record.CHROM, record.POS, record.REF, alt, s['AF']]
         if not offtarget:
             for s in record.samples:
-                    df_var.loc[len(df_var)] = ['Off target', 'N/A', 'N/A','N/A', record.CHROM, record.POS, record.REF, alt, s['FREQ']]
-
-
+                if "varscan." in vcffile:
+                    df_var.loc[len(df_var)] = ['Off target', 'N/A', 'N/A', 'N/A', record.CHROM, record.POS, record.REF,
+                                               alt, s['FREQ']]
+                elif "vardict." in vcffile:
+                    df_var.loc[len(df_var)] = ['Off target', 'N/A', 'N/A', 'N/A', record.CHROM, record.POS, record.REF,
+                                               alt, s['AF']]
+    # write the amplicon annotated variant dataframe to report
     rpt.write(df_var.to_csv(sep='\t', index=False))
 
 
 def main(argv):
-    ''' Main function, to locate amplivar output files inorder to report coverage and strand bias'''
-    ampoutput = ''
-    ampdir = ''
+    ''' Main function, to locate coverage output files and vcf file for amplivar pipeline'''
+    covdir = ''
+    vcfdir = ''
+    swiftlookup = ''
     # check: script has been presented with a directory
     try:
-        opts, args = getopt.getopt(argv, "o:a:")
+        opts, args = getopt.getopt(argv, "c:v:r:")
     except getopt.GetoptError:
         print "Unrecognised flag provided"
         sys.exit()
     # sets input directory to that specified as the amplivar output directory
     for opt, arg in opts:
-        if opt == '-o':
-            ampoutput = arg
-        elif opt == '-a':
-            ampdir = arg
+        if opt == '-c':
+            covdir = arg
+        elif opt == '-v':
+            vcfdir = arg
+        elif opt == '-r':
+            swiftlookup = arg
         else:
             assert "Directory not supplied"  # checks an argument has been supplied
             print "Required files not supplied"
-
+    print covdir
+    print vcfdir
+    print swiftlookup
     # check: vaild directory path has been entered
-    assert os.path.isdir(ampoutput) == True, "Amplivar output directory is not valid"
+    assert os.path.isdir(covdir) == True, "Amplivar output directory is not valid"
+    if len(vcfdir) > 1:  # vcf input optional, code will run without it
+        assert os.path.isdir(vcfdir) == True, "vcf input directory is not valid"
+    assert os.path.isfile(swiftlookup) == True, "Swift lookup input is not valid"
 
     ###################################################################################################################
-    dirs = []
-    dfiles = {}  # generate a dictionary of vcf and flanked files for each sample
-    for root, dirnames, filenames in os.walk(ampoutput):
-        dirs.append(dirnames)  # generate lists all directs found. Use to to get list of samples use as dict key
+    lcovfilenames = []
+    lsample = []
+    dsamples = {}  # generate a dictionary of vcf and flanked files for each sample
+    for root, dirnames, filenames in os.walk(covdir):
+        lcovfilenames.append(filenames)  # generate lists all files output from amplivar. Use to to get list of samples
 
-    for i in dirs[0]:  # loop through each sample directory identified to find .varscan.vcf and flanked.txt file
-        if ampoutput.endswith('/'):
-            spath = (str(ampoutput + i + '/'))
-        else:
-            spath = (str(ampoutput + '/' + i + '/'))
+    for i in lcovfilenames[0]:
+        # split file name after sample ID then add the sample id to a new list
+        lsample.append(i.split("_merged_")[0])
+    print "samples identified:"
+    print lsample
+
+    for i in lsample:  # loop through input directories to find coverage file (flanked.txt) and .vcf file
+        # initiate a dictionary for the vcf path (dvcf) and a second for the coverage file path (dflank)
         dvcf = {}
         dflank = {}
-        for root, dirnames, filenames in os.walk(spath):
-            c = 0
-            for filename in fnmatch.filter(filenames, '*.varscan.vcf'):  # find vcf files
-                if len(dvcf) > 0:
-                    c += 1
-                    dvcf['path' + str(c)] = os.path.join(root, filename)
-                else:
-                    dvcf['path'] = os.path.join(root, filename)
-            for filename in fnmatch.filter(filenames, '*flanked.txt'):  # find flanked files
-                if len(dflank) > 0:
-                    c += 1
-                    dflank['path' + str(c)] = os.path.join(root, filename)
-                else:
-                    dflank['path'] = os.path.join(root, filename)
-        dfiles[i] = {'vcf': dvcf, 'flank': dflank}  # add to dictionary as sample(dir): vcf, flanked
+
+        # Find vcf files for each sample. Look through vcf input dir
+        for root, dirnames, filenames in os.walk(vcfdir):
+            vcfname = i + '*.vcf'
+            for filename in fnmatch.filter(filenames, vcfname):  # find vcf files for sample
+                # add path to vcf dictionary,  as filename:filepath
+                dvcf[filename] = os.path.join(root, filename)
+
+        # Find coverage files for each sample. Look through coverage input dir
+        for root, dirnames, filenames in os.walk(covdir):
+            covname = i + '*flanked.txt'
+            for filename in fnmatch.filter(filenames, covname):  # find flanked file
+                # add path to coverage dictionary, as filename:filepath
+                dflank[filename] = os.path.join(root, filename)
+
+        dsamples[i] = {'vcf': dvcf,
+                       'flank': dflank}  # add dictionarys to a big dictionary as sampleID: vcf dictionary, coverage dictionary
+        # print dsamples
 
     ###################################################################################################################
-    # CHECK: black list all dir with no vcf, and flanked and remove from dictionary
+    # CHECK: black list all samples with no vcf, and flanked and remove from dictionary - should not be required in DNAnexus
     blklst = []
-    for k, v in dfiles.iteritems():
-        if len(v['vcf']) == 0 and len(v['flank']) == 0:
-            print k, "has no flanked or vcf files attributed. No further analysis will be conducted on sample."
-            blklst.append(k)
+    for sample, values in dsamples.iteritems():
+        if len(values['vcf']) == 0 and len(values['flank']) == 0:
+            print sample, "has no flanked or vcf files attributed. No further analysis will be conducted on sample."
+            blklst.append(sample)
     # remove key, values from dict that are black listed
     for b in blklst:
-        del dfiles[b]
+        del dsamples[b]
     ###################################################################################################################
 
-    # Load Dataframe of amplicon bedfile req for mapping variants and codons to amplicons.
-    bedfile = ampdir + "/bin/universal/SwiftPanel_named.tsv"
-    df_bed = DataFrame.from_csv(bedfile, sep="\t", index_col=None)
+    # Load Dataframe of amplicon lookup table req for mapping variants and codons to amplicons.
+    df_lookup = DataFrame.from_csv(swiftlookup, sep="\t", index_col=None)
 
     # Run coverage report generation for each sample
-    for k, v in dfiles.iteritems():
+    for sample, samplefiles in dsamples.iteritems():
+
         # generate empty coverage report
-        if ampoutput.endswith('/'):
-            rpt = open(str(ampoutput + k + '/' + k + '_coverage_report.txt'), "w")
-        else:
-            rpt = open(str(ampoutput + '/' + k + '/' + k + '_coverage_report.txt'), "w")
+        rpt = open(str('./' + sample + 'coverage_report.txt'), "w")
 
         # AMPLICON COVERAGE analysis and checks
-        if len(v['flank']) == 1:  # check: 1 flanked file found for sample
-            for s in v['flank']:
-                if "flanked/" + k in v['flank'][s]:  # check sample ID matches flanked file
-                    flankfile = v['flank'][s]
-                    try:
-                        # Dataframe from input Flanked file - amplicon read depth and amplicon strand bias calling
-                        df_flank = DataFrame.from_csv(flankfile, sep="\t", index_col=None)
-                        # Call amplicon coverage function
-                        readdep(df_flank, rpt, df_bed)
-                        # Call amplicon strand bias function
-                        ampSB(df_flank, rpt, flankfile, df_bed)
-                    except:
-                        rpt.write("Unable to load Flanked file, amplicon coverage not reported.\n")
-                        pass
-                else:
-                    rpt.write("Flanked.txt file did not match sample ID. Amplicon coverage not reported.\n")
+        if len(samplefiles['flank']) == 1:  # check: 1 flanked file found for sample
+            for sflankfile in samplefiles['flank']:
+                # set file name and path as seperate variables inorder to generate dataframs or pass to function.
+                flankfilename = sflankfile
+                flankfilepath = samplefiles['flank'][sflankfile]
+                try:
+                    # Dataframe from input Flanked file - amplicon read depth and amplicon strand bias calling
+                    df_flank = DataFrame.from_csv(flankfilepath, sep="\t", index_col=None)
+                    # Call amplicon coverage function
+                    readdep(df_flank, rpt, df_lookup, flankfilename)
+                    # Call amplicon strand bias function
+                    ampSB(df_flank, rpt, flankfilepath, df_lookup)
+                except:
+                    rpt.write("Unable to load Flanked.txt coverage file, amplicon coverage not reported.\n")
                     pass
-        elif len(v['flank']) == 0 or len(v['flank']) > 1:
-            # print k, "Number of flanked files found does not equal 1 please check sample output."
-            # print "Unsuitable number of flanked files found. Amplicon coverage and strand bias not computed for sample\n"
+                    # else:
+                    # rpt.write("Flanked.txt file did not match sample ID. Amplicon coverage not reported.\n")
+                    # pass
+        elif len(samplefiles['flank']) == 0 or len(samplefiles['flank']) > 1:
             rpt.write("Unsuitable number of flanked files found. Amplicon coverage and strand bias not computed.\n")
             pass
 
         # VARIANT SUMMARY and STRAND BIAS analysis and checks
-        if len(v['vcf']) == 1:  # check: 1 vcf file found for sample
-            for s in v['vcf']:
-                if k + ".blat.varscan.vcf" in v['vcf'][s]:  # check sample ID matches vcf file
-                    vcffile = v['vcf'][s]
-                    varSB(vcffile, rpt,df_bed)
-                    varFreq(vcffile, rpt, df_bed)
-                else:
-                    rpt.write("vcf file did not match sample ID. Variant frequency and strand bias not reported.\n")
-                    pass
-        elif len(v['vcf']) == 0 or len(v['vcf']) > 1:
+        if len(samplefiles['vcf']) == 1:  # check: 1 vcf file found for sample
+            for svcffile in samplefiles['vcf']:
+                # set file name and file path as variables
+                vcffilepath = samplefiles['vcf'][svcffile]
+
+                # call vcf functions
+                vcf_strandbias(svcffile, vcffilepath, rpt, df_lookup)
+                vcf_freq(svcffile, vcffilepath, rpt, df_lookup)
+
+        elif len(samplefiles['vcf']) == 0 or len(samplefiles['vcf']) > 1:
             rpt.write("Unsuitable number of vcf files found. Variant frequency and strand bias not computed.\n")
             pass
         rpt.close()
