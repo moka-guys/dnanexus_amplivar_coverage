@@ -3,7 +3,10 @@
 '''
 Author:         Amy Slater
 Created:        April 2017
-Description:    Parses Amplivar output files to consolidate coverage information into a text report.
+Modified:       June 2017
+Description:    Parses Amplivar output files and VarScan Or Vardict vcf files to consolidate coverage information into a text report.
+                Uses a look up file to annotate amplicon with cDNA region and condons covered and local naming"
+To run:			python path/to/Coverage_rpt.py -c path/to/coverage/files/ -c path/to/vcf/files/ -r path/to/amplicon_lookup_file.txt
 '''
 
 # Input files required per sample
