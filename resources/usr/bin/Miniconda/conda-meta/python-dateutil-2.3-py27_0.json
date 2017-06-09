@@ -1,0 +1,34 @@
+{
+  "arch": "x86_64",
+  "auth": null,
+  "build": "py27_0",
+  "build_number": 0,
+  "channel": "https://conda.anaconda.org/bioconda/linux-64",
+  "depends": [
+    "python 2.7*",
+    "six"
+  ],
+  "files": [
+    "lib/python2.7/site-packages/python_dateutil-2.3-py2.7.egg",
+    "lib/python2.7/site-packages/python_dateutil.pth"
+  ],
+  "fn": "python-dateutil-2.3-py27_0.tar.bz2",
+  "license": "BSD License",
+  "link": {
+    "source": "/home/amy/Documents/DNAnexus_Apps/dnanexus_amplivar_coverage/resources/usr/bin/Miniconda/pkgs/python-dateutil-2.3-py27_0",
+    "type": 1
+  },
+  "md5": "818695afd1900050dc72cdb42f3e720c",
+  "name": "python-dateutil",
+  "noarch": null,
+  "platform": "linux",
+  "preferred_env": null,
+  "priority": 0,
+  "requires": [],
+  "schannel": "bioconda",
+  "size": 217856,
+  "subdir": "linux-64",
+  "url": "https://conda.anaconda.org/bioconda/linux-64/python-dateutil-2.3-py27_0.tar.bz2",
+  "version": "2.3",
+  "with_features_depends": {}
+}

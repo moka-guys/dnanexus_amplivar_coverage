@@ -1,0 +1,5 @@
+#!/home/amy/Documents/DNAnexus_Apps/dnanexus_amplivar_coverage/resources/usr/bin/Miniconda/bin/python
+
+from idlelib.PyShell import main
+if __name__ == '__main__':
+    main()

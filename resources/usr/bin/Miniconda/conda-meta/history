@@ -1,0 +1,41 @@
+==> 2017-06-08 13:03:57 <==
+# cmd: /home/amy/Documents/DNAnexus_Apps/dnanexus_amplivar_coverage/resources/usr/bin/Miniconda/lib/python2.7/site-packages/conda/__main__.py install pandas
++defaults::asn1crypto-0.22.0-py27_0
++defaults::cffi-1.10.0-py27_0
++defaults::conda-4.3.21-py27_0
++defaults::conda-env-2.6.0-0
++defaults::cryptography-1.8.1-py27_0
++defaults::enum34-1.1.6-py27_0
++defaults::idna-2.5-py27_0
++defaults::ipaddress-1.0.18-py27_0
++defaults::libffi-3.2.1-1
++defaults::openssl-1.0.2l-0
++defaults::packaging-16.8-py27_0
++defaults::pip-9.0.1-py27_1
++defaults::pycosat-0.6.2-py27_0
++defaults::pycparser-2.17-py27_0
++defaults::pyopenssl-17.0.0-py27_0
++defaults::pyparsing-2.1.4-py27_0
++defaults::python-2.7.13-0
++defaults::readline-6.2-2
++defaults::requests-2.14.2-py27_0
++defaults::ruamel_yaml-0.11.14-py27_1
++defaults::setuptools-27.2.0-py27_0
++defaults::six-1.10.0-py27_0
++defaults::sqlite-3.13.0-0
++defaults::tk-8.5.18-0
++defaults::wheel-0.29.0-py27_0
++defaults::yaml-0.1.6-0
++defaults::zlib-1.2.8-3
+==> 2017-06-08 13:04:20 <==
+# cmd: /home/amy/Documents/DNAnexus_Apps/dnanexus_amplivar_coverage/resources/usr/bin/Miniconda/lib/python2.7/site-packages/conda/__main__.py install pandas
++bioconda::python-dateutil-2.3-py27_0
++defaults::mkl-2017.0.1-0
++defaults::numpy-1.12.1-py27_0
++defaults::pandas-0.20.2-np112py27_0
++defaults::pytz-2017.2-py27_0
+# install specs: pandas
+==> 2017-06-08 13:04:45 <==
+# cmd: /home/amy/Documents/DNAnexus_Apps/dnanexus_amplivar_coverage/resources/usr/bin/Miniconda/lib/python2.7/site-packages/conda/__main__.py install pyvcf
++bioconda::pyvcf-0.6.8-py27_0
+# install specs: pyvcf

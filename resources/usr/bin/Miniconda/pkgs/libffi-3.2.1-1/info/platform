@@ -1,0 +1,7 @@
+platform:  Linux-2.6.18-412.el5-x86_64-with-redhat-5.11-Final
+system:    Linux
+node:      centos5_x86_64.localdomain
+release:   2.6.18-412.el5
+version:   #1 SMP Mon Sep 5 23:11:58 UTC 2016
+machine:   x86_64
+processor: x86_64

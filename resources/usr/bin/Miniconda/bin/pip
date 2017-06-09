@@ -1,0 +1,6 @@
+#!/home/amy/Documents/DNAnexus_Apps/dnanexus_amplivar_coverage/resources/usr/bin/Miniconda/bin/python
+if __name__ == '__main__':
+    import sys
+    import pip
+
+    sys.exit(pip.main())
