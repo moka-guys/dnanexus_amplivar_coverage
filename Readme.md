@@ -11,14 +11,16 @@
 
 ## What are typical use cases for this app?
 
-This app generates a single file per sample, collating and summarising the read depth and variant information output as several files by the amplivar pipeline, for testing somatic cancer samples using the SWIFT amplicon panels. This app highlights amplicons and variants with low read depth, strand bias or which may require further investigation. 
+This app generates a single file per sample, collating and summarising the read depth and variant information output as several files by the amplivar pipeline, for testing somatic cancer samples using the SWIFT amplicon panels. 
+This app highlights amplicons and variants (if a vcf is supplied) with low read depth , strand bias, which may require further investigation.
+Coverage report will only be generated for a sample if a Amplicon read depth tally file (`*flanked.txt`) is supplied. 
 
 ## What inputs are required for this app to run?
 
 This app requires the following data:
 
-- Amplicon read depth tally file(s), output from Amplivar (e.g `*_merged_seqprep.fastq.cut.fastq.fna_1_num_grp_flanked.txt`)
-- vcf file(s) (`*.vcf`) output from either Varscan or VarDict
+- Amplicon read depth tally file(s), output from Amplivar (e.g `*_merged_seqprep.fastq.cut.fastq.fna_1_num_grp_flanked.txt`)(REQUIRED).
+- vcf file(s) (`*.vcf`) output from either Varscan or VarDict (Optonal)
 - Tab delimited look up file detailing the *amplicon information* for the pannel analysed (REQUIRED). File must have the file externtion `*.tsv` and must be in the following format:
 	`Chr	Start	End	Gene	Key_Hotspots	Orientation	Swift_LocusID	Amplivar_Name	cDNA	Codons`
 
