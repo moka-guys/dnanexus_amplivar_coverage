@@ -1,27 +1,25 @@
 # Dnanexus Amplivar-coverage v1.0
 
 ## What does this app do?
-
-- This app runs a file parser and generates a single report per sample summarising the output from amplivar and variant calling into one document.
-- This app annotates amplicons with the local 'lab' name, the cDNA regions and the condons the amplicon covers (form henceforth shall be termed *amplicon information*).
-- This app highlights amplicons with low coverage or bias in read depth between forward and reverse strands. See below for definitions.
-- This app highlights all variants where stand bias is observed. See below for definitions.
-- This app summarises all variants identified, allele frequency and annotates with the *amplicon information*.
-- This app can take multiple coverage and vcf files as input, generating coverage reports on multiple samples.
+- This app runs a Python script which parses output from amplivar and variant calling steps into one document per sample. The script:
+  - annotates amplicons with the local 'lab' name, the cDNA regions and the codons the amplicon covers (henceforth shall be termed *amplicon information*).
+  - highlights amplicons with low coverage or bias in read depth between forward and reverse strands. See below for definitions.
+  - highlights all variants where stand bias is observed. See below for definitions.
+  - summarises all variants identified, allele frequency and annotates with the *amplicon information*.
 
 ## What are typical use cases for this app?
-
-This app generates a single file per sample, collating and summarising the read depth and variant information output as several files by the amplivar pipeline, for testing somatic cancer samples using the SWIFT amplicon panels. 
-This app highlights amplicons and variants (if a vcf is supplied) with low read depth , strand bias, which may require further investigation.
-Coverage report will only be generated for a sample if a Amplicon read depth tally file (`*flanked.txt`) is supplied. 
+This app is used on somatic cancer samples being assessed using the SWIFT amplicon panels (processed using amplivar and varscan/vardict).
+The app collates and summarises read depth and variant information output from several files created by the amplivar pipeline. 
+This app highlights amplicons and variants (if a vcf is supplied) with low read depth or strand bias, which may require further investigation.
+Coverage report will only be generated for a sample if a amplicon read depth tally file (`*flanked.txt`) is supplied. 
 
 ## What inputs are required for this app to run?
-
 This app requires the following data:
 
 - Amplicon read depth tally file(s), output from Amplivar (e.g `*_merged_seqprep.fastq.cut.fastq.fna_1_num_grp_flanked.txt`)(REQUIRED).
-- vcf file(s) (`*.vcf`) output from either Varscan or VarDict (Optonal)
-- Tab delimited look up file detailing the *amplicon information* for the pannel analysed (REQUIRED). File must have the file externtion `*.tsv` and must be in the following format:
+- vcf file(s) (`*.vcf`) output from either Varscan or VarDict (Optional)
+- Tab delimited look up file detailing the *amplicon information* for the panel analysed (REQUIRED). File must have the file extension `*.tsv` and must be in the following format:
+
 	`Chr	Start	End	Gene	Key_Hotspots	Orientation	Swift_LocusID	Amplivar_Name	cDNA	Codons`
 
 **Note**: Amplivar_name MUST match the gene column within the coverage `.txt` files output by Amplivar.
