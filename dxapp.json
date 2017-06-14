@@ -1,7 +1,7 @@
 {
-  "name": "amplicvar_coverage_report",
+  "name": "amplivar_coverage_report",
   "title": "Amplivar coverage report",
-  "summary": "v1.0 - (A file parse to sumemrise and annotate amplicon read depth and variant outputs from Amplivar)",
+  "summary": "v1.0 - (A file parse to summerise and annotate amplicon read depth and variant outputs from Amplivar)",
   "tags": [
     "Variants",
     "Cancer"
