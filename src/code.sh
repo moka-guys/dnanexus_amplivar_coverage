@@ -19,8 +19,8 @@ for input in /home/dnanexus/in/coverage/*; do if [ -d "$input" ]; then mv $input
 for input in /home/dnanexus/in/vcfs/*; do if [ -d "$input" ]; then mv $input/* vcfsin/; fi; done
 # set -v variable to dir path
 if [[ "$vcfs" != "" ]]; then
-	vcfs="-v /home/dnanexus/vcfsin"
-else vcfs=""
+	allvcfs="-v /home/dnanexus/vcfsin"
+else allvcfs=""
 fi;
 
 # Add Packaged miniconda to PATH
@@ -30,7 +30,7 @@ python -m conda list
 
 # run coverage_rpt script 
 mark-section "Run file parser"
-python /usr/bin/Coverage_rpt.py -c /home/dnanexus/coveragein $vcfs -r $lookup_path
+python /usr/bin/Coverage_rpt.py -c /home/dnanexus/coveragein $allvcfs -r $lookup_path
 
 ## move the output coverage reports and upload
 mark-section "Upload output"
