@@ -1,0 +1,3 @@
+/opt/anaconda1anaconda2anaconda3 text bin/vcf_filter.py
+/opt/anaconda1anaconda2anaconda3 text bin/vcf_melt
+/opt/anaconda1anaconda2anaconda3 text bin/vcf_sample_filter.py

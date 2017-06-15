@@ -1,0 +1,31 @@
+# This file created by conda-build 2.0.11+6.g43b927b
+# meta.yaml template originally from:
+# /home/ray/conda/anaconda/packages/libffi, last modified Mon Dec  5 23:52:34 2016
+# ------------------------------------------------
+
+package:
+    name: libffi
+    version: 3.2.1
+source:
+    md5: 83b89587607e3eb65c70d361f13bab43
+    url: ftp://sourceware.org/pub/libffi/libffi-3.2.1.tar.gz
+build:
+    features: ''
+    number: '1'
+    string: '1'
+requirements:
+    build: !!python/object:__builtin__.instancemethod {}
+about:
+    description: 'The libffi library provides a portable, high level programming interface
+
+        to various calling conventions. This allows a programmer to call any
+
+        function specified by a call interface description at run-time.
+
+        '
+    dev_url: https://github.com/libffi/libffi
+    doc_url: https://sourceware.org/libffi/
+    home: https://sourceware.org/libffi/
+    license: MIT
+    license_file: LICENSE
+    summary: portable foreign-function interface library

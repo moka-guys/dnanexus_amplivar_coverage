@@ -1,0 +1,28 @@
+{
+  "arch": "x86_64", 
+  "build": "1", 
+  "build_number": 1, 
+  "depends": [], 
+  "files": [
+    "include/ffi.h", 
+    "include/ffitarget.h", 
+    "lib/libffi.a", 
+    "lib/libffi.la", 
+    "lib/libffi.so", 
+    "lib/libffi.so.6", 
+    "lib/libffi.so.6.0.4", 
+    "lib/pkgconfig/libffi.pc"
+  ], 
+  "installed_by": "Miniconda2-4.3.21-Linux-x86_64", 
+  "license": "MIT", 
+  "link": {
+    "source": "/home/amy/Documents/DNAnexus_Apps/dnanexus_amplivar_coverage/resources/usr/bin/Miniconda/pkgs/libffi-3.2.1-1", 
+    "type": "hard-link"
+  }, 
+  "md5": "b8297fc22fd5f713e619329001546adc", 
+  "name": "libffi", 
+  "platform": "linux", 
+  "subdir": "linux-64", 
+  "url": "https://repo.continuum.io/pkgs/free/linux-64/libffi-3.2.1-1.tar.bz2", 
+  "version": "3.2.1"
+}

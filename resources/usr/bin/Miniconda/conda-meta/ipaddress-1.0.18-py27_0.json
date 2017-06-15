@@ -1,0 +1,26 @@
+{
+  "arch": "x86_64", 
+  "build": "py27_0", 
+  "build_number": 0, 
+  "depends": [
+    "python 2.7*"
+  ], 
+  "files": [
+    "lib/python2.7/site-packages/ipaddress-1.0.18-py2.7.egg-info", 
+    "lib/python2.7/site-packages/ipaddress.py", 
+    "lib/python2.7/site-packages/ipaddress.pyc"
+  ], 
+  "installed_by": "Miniconda2-4.3.21-Linux-x86_64", 
+  "license": "Python Software Foundation License", 
+  "license_family": "PSF", 
+  "link": {
+    "source": "/home/amy/Documents/DNAnexus_Apps/dnanexus_amplivar_coverage/resources/usr/bin/Miniconda/pkgs/ipaddress-1.0.18-py27_0", 
+    "type": "hard-link"
+  }, 
+  "md5": "747ad30c034c5f3b5e8bbbd89b10bf48", 
+  "name": "ipaddress", 
+  "platform": "linux", 
+  "subdir": "linux-64", 
+  "url": "https://repo.continuum.io/pkgs/free/linux-64/ipaddress-1.0.18-py27_0.tar.bz2", 
+  "version": "1.0.18"
+}

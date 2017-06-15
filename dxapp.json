@@ -1,0 +1,56 @@
+{
+  "name": "amplivar_coverage_report",
+  "title": "Amplivar coverage report",
+  "summary": "v1.0 - (A file parse to summerise and annotate amplicon read depth and variant outputs from Amplivar)",
+  "tags": [
+    "Variants",
+    "Cancer"
+  ],
+  "properties": {
+    "github release": "v1.0"
+  },
+  "dxapi": "1.0.0",
+  "inputSpec": [
+    {
+      "name": "coverage",
+      "label": "Amplicon coverage data",
+      "help": "Amplivar coverage (read depth) data files [-c]",
+      "class": "array:file",
+      "patterns": ["*_flanked.txt"],
+      "optional": false
+    },
+    {
+     "name": "vcfs",
+     "label": "vcf files",
+     "help": "vcf outout from either Varscan or VarDict [-v]",
+     "class": "array:file",
+     "patterns": ["*.vcf"],
+     "optional": true
+    },  
+    {
+      "name": "lookup",
+      "label": "Amplicon look up table",
+      "help": "Amplicon information look up table [-r]",
+      "class": "file",
+      "patterns": ["*.tsv"],
+      "optional": false
+    }
+    ],
+  "outputSpec": [
+    {
+      "name": "coverage_rpt",
+      "label": "Output coverage reports",
+      "help": "Amplicon and variant coverage reports.",
+      "class": "array:file"
+    }
+  ],
+    "runSpec": {
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem1_ssd1_x2"
+      }
+    },
+    "file": "src/code.sh",
+    "interpreter": "bash"
+  }
+}
