@@ -6,7 +6,7 @@ Created:        April 2017
 Modified:       June 2017
 Description:    Parses Amplivar output files and VarScan Or Vardict vcf files to consolidate coverage information into a text report.
                 Uses a look up file to annotate amplicon with cDNA region and condons covered and local naming"
-To run:			python path/to/Coverage_rpt.py -c path/to/coverage/files/ -c path/to/vcf/files/ -r path/to/amplicon_lookup_file.txt
+To run:			python path/to/Coverage_rpt.py -c path/to/coverage/files/ -v path/to/vcf/files/ -r path/to/amplicon_lookup_file.txt
 '''
 
 # Input files required per sample
@@ -149,12 +149,12 @@ def vcf_freq(vcffile, vcffilepath, rpt, df_lookup):
     for record in avcf:
         # reformat alt to be a string
         alt = ",".join(str(i) for i in record.ALT)
-        offtarget = False
+        ontarget = False
         # uses variants genomic position compared to amplicons start and end location to identify corresponding amplicons
         # loops through lookup table
         for index, lookup in df_lookup.iterrows():
             if record.POS >= lookup['Start'] and record.POS <= lookup['End']:
-                offtarget = True
+                ontarget = True
                 for s in record.samples:
                     # run loop to pull out info from varscan vcf
                     if "varscan." in vcffile:
@@ -165,7 +165,7 @@ def vcf_freq(vcffile, vcffilepath, rpt, df_lookup):
                     elif "vardict." in vcffile:
                         df_var.loc[len(df_var)] = [lookup['Amplivar_Name'], lookup['Gene'], lookup['cDNA'],
                                                    lookup['Codons'], record.CHROM, record.POS, record.REF, alt, s['AF']]
-        if not offtarget:
+        if not ontarget:
             for s in record.samples:
                 if "varscan." in vcffile:
                     df_var.loc[len(df_var)] = ['Off target', 'N/A', 'N/A', 'N/A', record.CHROM, record.POS, record.REF,
@@ -204,7 +204,7 @@ def main(argv):
     print swiftlookup
     # check: vaild directory path has been entered
     assert os.path.isdir(covdir) == True, "Amplivar output directory is not valid"
-    if len(vcfdir) > 1:  # vcf input optional, code will run without it
+    if len(vcfdir) > 0:  # vcf input optional, code will run without it
         assert os.path.isdir(vcfdir) == True, "vcf input directory is not valid"
     assert os.path.isfile(swiftlookup) == True, "Swift lookup input is not valid"
 
