@@ -1,4 +1,4 @@
-# Dnanexus Amplivar-coverage v1.0
+# Dnanexus Amplivar-coverage v1.1
 
 ## What does this app do?
 - This app runs a Python script which parses output from amplivar and variant calling steps into one document per sample. The script:
