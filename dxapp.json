@@ -1,6 +1,6 @@
 {
-  "name": "amplivar_coverage_report",
-  "title": "Amplivar coverage report",
+  "name": "amplivar_coverage_report_v1.1",
+  "title": "Amplivar coverage report v1.1",
   "summary": "v1.1 - (A file parse to summerise and annotate amplicon read depth and variant outputs from Amplivar)",
   "tags": [
     "Variants",
