@@ -30,7 +30,7 @@ python -m conda list
 
 # run coverage_rpt script 
 mark-section "Run file parser"
-python /usr/bin/Coverage_rpt.py -c /home/dnanexus/coveragein $allvcfs -r $lookup_path
+python /usr/bin/Coverage_rpt.py -c /home/dnanexus/coveragein $allvcfs
 
 ## move the output coverage reports and upload
 mark-section "Upload output"

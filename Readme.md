@@ -1,4 +1,4 @@
-# Dnanexus Amplivar-coverage v1.1
+# Dnanexus Amplivar-coverage v1.2
 
 ## What does this app do?
 - This app runs a Python script which parses output from amplivar and variant calling steps into one document per sample. The script:
@@ -10,27 +10,22 @@
 ## What are typical use cases for this app?
 This app is used on somatic cancer samples being assessed using the SWIFT amplicon panels (processed using amplivar and varscan/vardict).
 The app collates and summarises read depth and variant information output from several files created by the amplivar pipeline. 
-This app highlights amplicons and variants (if a vcf is supplied) with low read depth or strand bias, which may require further investigation.
-Coverage report will only be generated for a sample if a amplicon read depth tally file (`*flanked.txt`) is supplied. 
+This app highlights amplicons and variants with low read depth or strand bias, which may require further investigation.
+
 
 ## What inputs are required for this app to run?
 This app requires the following data:
 
-- Amplicon read depth tally file(s), output from Amplivar (e.g `*_merged_seqprep.fastq.cut.fastq.fna_1_num_grp_flanked.txt`)(REQUIRED).
-- vcf file(s) (`*.vcf`) output from either Varscan or VarDict (Optional)
-- Tab delimited look up file detailing the *amplicon information* for the panel analysed (REQUIRED). File must have the file extension `*.tsv` and must be in the following format:
-
-	`Chr	Start	End	Gene	Key_Hotspots	Orientation	Swift_LocusID	Amplivar_Name	cDNA	Codons`
-
-**Note**: Amplivar_name MUST match the gene column within the coverage `.txt` files output by Amplivar.
-
+- Amplicon read depth tally file(s), output from Amplivar (e.g `*_merged_seqprep.fastq.cut.fastq.fna_1_num_grp_flanked.txt`)
+- Amplicon must be named in the format: 001_GENE_cDNA_1-100_NM_1234_1-33_chr1:1000-1100 - This naming is created by amplivar using amplicon naming in the flanking file
+- vcf file(s) (`*.vcf`) output from either Varscan or VarDict 
 
 ## What does this app output?
-
 The app outputs a `.txt` file per sample summarising:
 
 - Amplicons covered < 1000x total or with either forward or reverse covered < 500x.
 - Amplicons with total coverage between 1000 and 2000x.
+- Amplicons where either the forward or reverse read count is 0
 - Amplicons displaying a strand bias in read depth. Defined as +/-20% variation between forward or reverse read count.
 - Variants displaying strand bias. Defined as >90% variant supporting reads are from 1 read direction (forward or reverse).
 - Summary of all variants within input vcf, annotated with amplicon name, cDNA region and codons covered by the amplicon and the variant allele frequency. 
